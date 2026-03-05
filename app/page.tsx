@@ -1,65 +1,171 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
+import { ReactLenis, type LenisRef } from "lenis/react";
+
+gsap.registerPlugin(ScrollTrigger);
 
 export default function Home() {
+  const lenisRef = useRef<LenisRef | null>(null);
+  const containerRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    function update(time: number) {
+      lenisRef.current?.lenis?.raf(time * 1000);
+    }
+
+    lenisRef.current?.lenis?.on("scroll", ScrollTrigger.update);
+    gsap.ticker.add(update);
+    gsap.ticker.lagSmoothing(0);
+
+    return () => gsap.ticker.remove(update);
+  }, []);
+
+  useGSAP(
+    () => {
+      const sections = document.querySelectorAll("section");
+
+      sections.forEach((section, index) => {
+        const container = section.querySelector(".container");
+        if (!container) return;
+
+        gsap.to(container, {
+          rotation: 0,
+          ease: "none",
+          scrollTrigger: {
+            trigger: section,
+            start: "top bottom",
+            end: "top 20%",
+            scrub: true,
+          },
+        });
+
+        if (index === sections.length - 1) return;
+
+        ScrollTrigger.create({
+          trigger: section,
+          start: "bottom bottom",
+          end: "bottom top",
+          pin: true,
+          pinSpacing: false,
+        });
+      });
+    },
+    { scope: containerRef },
+  );
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <>
+      <ReactLenis root options={{ autoRaf: false }} ref={lenisRef} />
+      <main ref={containerRef}>
+      <section className="one">
+        <div className="container">
+          <div className="col">
+            <h1>Entry Point</h1>
+          </div>
+          <div className="col">
+            <p>
+              This space introduces an initial idea without defining its
+              outcome. Forms exist in a state of balance, shaped by intention
+              rather than urgency. Nothing here demands resolution yet,
+              allowing interpretation, contrast, and continuity to emerge
+              naturally over time.
+            </p>
+          </div>
+        </div>
+      </section>
+      <section className="two">
+        <div className="container">
+          <div className="col">
+            <div className="img">
+              <img src="card-img1.jpg" alt="" />
+            </div>
+          </div>
+          <div className="col">
+            <h1>Gesture</h1>
+            <p>
+              Form and expression intersect without explanation. The subject
+              exists between motion and stillness, marked by attitude rather
+              than intent. What matters here is presence, silhouette, and the
+              subtle tension created through contrast and placement.
+            </p>
+          </div>
+        </div>
+      </section>
+      <section className="three">
+        <div className="container">
+          <div className="col">
+            <h1>Variation</h1>
+            <p>
+              This section explores difference through placement and
+              proportion. Repetition is avoided in favor of subtle change,
+              where form, spacing, and color work together to maintain
+              cohesion without uniformity.
+            </p>
+          </div>
+          <div className="col">
+            <div className="img">
+              <img src="card-img2.jpg" alt="" />
+            </div>
+          </div>
+        </div>
+      </section>
+      <section className="four">
+        <div className="container">
+          <div className="img">
+            <img src="card-img4.jpg" alt="" />
+          </div>
+          <h1>The Stance</h1>
+          <p>
+            A clearer position begins to take shape. Elements feel grounded,
+            deliberate, and visually assured. Rather than drifting, the
+            composition asserts itself through proportion, contrast, and a
+            controlled sense of weight.
+          </p>
+          <p>
+            The layout favors stability over motion, offering a moment of
+            visual certainty. Everything appears placed with purpose, allowing
+            the section to feel complete without closing off interpretation.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+      <section className="five">
+        <div className="container">
+          <div className="col">
+            <h1>Stillness</h1>
+          </div>
+          <div className="col">
+            <p>
+              This space holds without interruption. Nothing shifts
+              unnecessarily, allowing form and color to remain uninterrupted.
+              The emphasis rests on calm presence, where simplicity and
+              restraint shape the experience without demanding attention.
+            </p>
+          </div>
         </div>
+      </section>
+      <section className="six">
+        <div className="container">
+          <div className="col">
+            <h1>Release</h1>
+          </div>
+          <div className="col">
+            <p>
+              The composition loosens its grip and allows space to dominate.
+              Elements soften, contrast fades, and structure becomes secondary.
+              What remains is a sense of openness, where the experience settles
+              without urgency or demand.
+            </p>
+          </div>
+        </div>
+      </section>
+      <footer>
+        <h1>Footer</h1>
+      </footer>
       </main>
-    </div>
+    </>
   );
 }
